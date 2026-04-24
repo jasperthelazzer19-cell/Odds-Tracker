@@ -37,10 +37,7 @@ def decimal_to_american(decimal):
 
 def get_scores():
     scores = {"NBA": [], "NFL": []}
-    espn_sports = [
-        ("basketball/nba", "NBA"),
-        ("football/nfl", "NFL")
-    ]
+    espn_sports = [("basketball/nba", "NBA"), ("football/nfl", "NFL")]
     for sport_path, sport_label in espn_sports:
         try:
             url = "https://site.api.espn.com/apis/site/v2/sports/" + sport_path + "/scoreboard"
@@ -102,16 +99,14 @@ def get_game_stats(sport, event_id):
 def get_props(sport, event_id):
     props_market = NBA_PROPS if "basketball" in sport else NFL_PROPS
     url = "https://api.the-odds-api.com/v4/sports/" + sport + "/events/" + event_id + "/odds"
-    params = {
-        "apiKey": API_KEY,
-        "regions": "us",
-        "markets": props_market,
-        "oddsFormat": "american"
-    }
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
+    params = {"apiKey": API_KEY, "regions": "us", "markets": props_market, "oddsFormat": "american"}
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        if response.status_code != 200:
+            return {}
+        data = response.json()
+    except:
         return {}
-    data = response.json()
     props = {}
     for bookmaker in data.get("bookmakers", []):
         book = bookmaker["title"]
@@ -123,8 +118,7 @@ def get_props(sport, event_id):
                 player = outcome.get("description", outcome["name"])
                 line = outcome.get("point", "")
                 bet_type = outcome["name"]
-                key = str(player) + " - " + str(bet_type) + " " + str(line)
-                key = key.strip()
+                key = (str(player) + " - " + str(bet_type) + " " + str(line)).strip()
                 if key not in props[market_key]:
                     props[market_key][key] = {"odds": [], "books": {}}
                 props[market_key][key]["odds"].append(outcome["price"])
@@ -142,11 +136,8 @@ def get_props(sport, event_id):
             best_book = max(book_odds, key=lambda b: book_odds[b])
             best_link = BOOK_LINKS.get(best_book, "#")
             averaged[market_key][bet] = {
-                "average": avg_american,
-                "best": best_odds,
-                "best_book": best_book,
-                "best_link": best_link,
-                "books": len(odds_list)
+                "average": avg_american, "best": best_odds,
+                "best_book": best_book, "best_link": best_link, "books": len(odds_list)
             }
     return averaged
 
@@ -156,12 +147,7 @@ def get_odds():
     for sport in SPORTS:
         label = sport_map[sport]
         url = "https://api.the-odds-api.com/v4/sports/" + sport + "/odds"
-        params = {
-            "apiKey": API_KEY,
-            "regions": "us",
-            "markets": "h2h",
-            "oddsFormat": "american"
-        }
+        params = {"apiKey": API_KEY, "regions": "us", "markets": "h2h", "oddsFormat": "american"}
         try:
             response = requests.get(url, params=params, timeout=10)
             data = response.json()
@@ -178,12 +164,9 @@ def get_odds():
                 date_str = "Unknown Date"
                 time_str = ""
             game_data = {
-                "home": game["home_team"],
-                "away": game["away_team"],
-                "time": time_str,
-                "event_id": game["id"],
-                "sport_key": sport,
-                "teams": {}
+                "home": game["home_team"], "away": game["away_team"],
+                "time": time_str, "event_id": game["id"],
+                "sport_key": sport, "teams": {}
             }
             team_book_odds = {}
             for bookmaker in game.get("bookmakers", []):
@@ -208,12 +191,9 @@ def get_odds():
                 best_link = BOOK_LINKS.get(best_book, "#")
                 implied_prob = round((1 / avg_decimal) * 100, 1)
                 game_data["teams"][team] = {
-                    "average": avg_american,
-                    "best": best_odds,
-                    "best_book": best_book,
-                    "best_link": best_link,
-                    "books": len(odds_list),
-                    "win_prob": implied_prob
+                    "average": avg_american, "best": best_odds,
+                    "best_book": best_book, "best_link": best_link,
+                    "books": len(odds_list), "win_prob": implied_prob
                 }
             if date_str not in result[label]:
                 result[label][date_str] = []
@@ -223,307 +203,256 @@ def get_odds():
 HTML = """<!DOCTYPE html>
 <html>
 <head>
-    <title>Live Odds Tracker</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; margin: 0; padding: 0; }
-        h1 { color: #e94560; text-align: center; padding: 20px 0 0 0; margin: 0; }
-        .layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 230px; min-width: 180px; background: #0f3460; padding: 15px; overflow-y: auto; flex-shrink: 0; }
-        .sidebar h2 { color: #e94560; font-size: 1em; margin: 0 0 10px 0; border-bottom: 1px solid #e94560; padding-bottom: 6px; }
-        .sidebar-sport { color: #4ecca3; font-size: 0.8em; font-weight: bold; margin: 10px 0 5px 0; }
-        .score-card { background: #16213e; border-radius: 6px; padding: 8px 10px; margin-bottom: 6px; font-size: 0.82em; cursor: pointer; }
-        .score-card:hover { background: #1e3a6e; }
-        .score-row { display: flex; justify-content: space-between; margin: 2px 0; }
-        .score-team { color: #eee; }
-        .score-num { color: #4ecca3; font-weight: bold; }
-        .score-status { font-size: 0.75em; margin-top: 3px; }
-        .live { color: #4ecca3; }
-        .final { color: #888; }
-        .pre { color: #aaa; }
-        .no-scores { color: #888; font-size: 0.82em; font-style: italic; }
-        .main { flex: 1; padding: 0 20px 20px 20px; min-width: 0; }
-        .sport-tabs { display: flex; gap: 10px; margin: 20px 0 10px 0; justify-content: center; }
-        .tab-btn { background: #0f3460; color: #eee; border: none; padding: 10px 30px; border-radius: 5px; cursor: pointer; font-size: 1.1em; font-weight: bold; }
-        .tab-btn:hover { background: #c73652; }
-        .tab-btn.active { background: #e94560; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 15px 0; }
-        .nav a button, .nav button { background: #0f3460; color: #eee; border: none; padding: 8px 18px; border-radius: 5px; cursor: pointer; font-size: 0.95em; }
-        .nav a button:hover, .nav button:hover { background: #e94560; }
-        .nav button:disabled { background: #333; cursor: not-allowed; }
-        .date-title { color: #e94560; font-size: 1.4em; }
-        .game { background: #16213e; border-radius: 8px; padding: 15px; margin: 10px 0; }
-        .game-title { font-size: 1.05em; font-weight: bold; margin-bottom: 5px; color: #fff; cursor: pointer; }
-        .game-title:hover { color: #4ecca3; }
-        .game-time { color: #888; font-size: 0.85em; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        th { background: #0f3460; padding: 7px 8px; text-align: left; font-size: 0.82em; }
-        td { padding: 7px 8px; border-bottom: 1px solid #0f3460; font-size: 0.82em; }
-        .positive { color: #4ecca3; }
-        .negative { color: #e94560; }
-        .book-link { color: #4ecca3; text-decoration: none; font-weight: bold; }
-        .book-link:hover { text-decoration: underline; }
-        .btn-props { background: #0f3460; color: #eee; border: none; padding: 6px 13px; border-radius: 5px; cursor: pointer; font-size: 0.83em; margin-top: 8px; }
-        .btn-props:hover { background: #e94560; }
-        .props-section { display: none; margin-top: 12px; }
-        .props-section.open { display: block; }
-        .prop-cat { color: #4ecca3; font-size: 0.9em; margin: 10px 0 4px 0; font-weight: bold; border-bottom: 1px solid #4ecca3; padding-bottom: 2px; }
-        .refresh { text-align: center; color: #888; font-size: 0.8em; margin-top: 20px; }
-        .loading { color: #888; font-size: 0.85em; font-style: italic; padding: 8px 0; }
-        .no-games { color: #888; text-align: center; padding: 30px; font-style: italic; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 999; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 40px 20px; }
-        .modal-overlay.open { display: flex; }
-        .modal { background: #16213e; border-radius: 10px; padding: 25px; max-width: 950px; width: 100%; position: relative; }
-        .modal-close { position: absolute; top: 12px; right: 12px; background: #e94560; border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.95em; }
-        .modal-title { color: #e94560; font-size: 1.2em; font-weight: bold; margin-bottom: 15px; }
-        .modal-team { color: #4ecca3; font-size: 0.95em; font-weight: bold; margin: 14px 0 6px 0; }
-        .stats-wrap { overflow-x: auto; }
-        .stats-tbl { border-collapse: collapse; font-size: 0.78em; min-width: 100%; }
-        .stats-tbl th { background: #0f3460; padding: 5px 8px; white-space: nowrap; text-align: left; }
-        .stats-tbl td { padding: 5px 8px; border-bottom: 1px solid #0f3460; white-space: nowrap; }
-    </style>
-    <script>
-        var currentSport = 'NBA';
-
-        function switchTab(sport) {
-            currentSport = sport;
-            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
-            document.getElementById('content-' + sport).classList.add('active');
-            document.getElementById('tab-' + sport).classList.add('active');
-        }
-
-        function toggleProps(gameId, sportKey, eventId) {
-            var section = document.getElementById('props-' + gameId);
-            var btn = document.getElementById('btn-' + gameId);
-            if (section.classList.contains('open')) {
-                section.classList.remove('open');
-                btn.textContent = 'Show Player Props';
-                return;
-            }
-            section.classList.add('open');
-            btn.textContent = 'Hide Player Props';
-            if (section.dataset.loaded) return;
-            section.dataset.loaded = '1';
-            section.innerHTML = '<div class="loading">Loading props...</div>';
-            fetch('/props?sport=' + encodeURIComponent(sportKey) + '&event_id=' + encodeURIComponent(eventId))
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    var keys = Object.keys(data);
-                    if (keys.length === 0) {
-                        section.innerHTML = '<div class="loading">No props available yet.</div>';
-                        return;
-                    }
-                    var html = '';
-                    keys.forEach(function(market) {
-                        html += '<div class="prop-cat">' + market + '</div>';
-                        html += '<table><tr><th>Bet</th><th>Avg</th><th>Best</th><th>Best Book</th><th>Books</th></tr>';
-                        Object.keys(data[market]).forEach(function(bet) {
-                            var d = data[market][bet];
-                            var avgStr = (d.average > 0 ? '+' : '') + d.average;
-                            var bestStr = (d.best > 0 ? '+' : '') + d.best;
-                            html += '<tr><td>' + bet + '</td>';
-                            html += '<td class="' + (d.average > 0 ? 'positive' : 'negative') + '">' + avgStr + '</td>';
-                            html += '<td class="' + (d.best > 0 ? 'positive' : 'negative') + '">' + bestStr + '</td>';
-                            html += '<td><a href="' + d.best_link + '" target="_blank" class="book-link">' + d.best_book + '</a></td>';
-                            html += '<td>' + d.books + '</td></tr>';
-                        });
-                        html += '</table>';
-                    });
-                    section.innerHTML = html;
-                })
-                .catch(function() { section.innerHTML = '<div class="loading">Could not load props.</div>'; });
-        }
-
-        function openStats(sport, eventId, title) {
-            var modal = document.getElementById('stats-modal');
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-body').innerHTML = '<div class="loading">Loading stats...</div>';
-            modal.classList.add('open');
-            if (!eventId) {
-                document.getElementById('modal-body').innerHTML = '<div class="loading">No event ID available.</div>';
-                return;
-            }
-            fetch('/game_stats?sport=' + encodeURIComponent(sport) + '&event_id=' + encodeURIComponent(eventId))
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (!data.teams || data.teams.length === 0) {
-                        document.getElementById('modal-body').innerHTML = '<div class="loading">Stats not available yet.</div>';
-                        return;
-                    }
-                    var html = '';
-                    data.teams.forEach(function(team) {
-                        if (!team.players || team.players.length === 0) return;
-                        html += '<div class="modal-team">' + team.name + '</div>';
-                        html += '<div class="stats-wrap"><table class="stats-tbl"><tr><th>Player</th>';
-                        data.labels.forEach(function(l) { html += '<th>' + l + '</th>'; });
-                        html += '</tr>';
-                        team.players.forEach(function(p) {
-                            html += '<tr><td>' + p.name + '</td>';
-                            data.labels.forEach(function(l) { html += '<td>' + (p.stats[l] || '-') + '</td>'; });
-                            html += '</tr>';
-                        });
-                        html += '</table></div>';
-                    });
-                    document.getElementById('modal-body').innerHTML = html || '<div class="loading">No stats yet.</div>';
-                })
-                .catch(function() { document.getElementById('modal-body').innerHTML = '<div class="loading">Could not load stats.</div>'; });
-        }
-
-        function closeModal() {
-            document.getElementById('stats-modal').classList.remove('open');
-        }
-
-        function refreshScores() {
-            fetch('/scores')
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    ['NBA', 'NFL'].forEach(function(sport) {
-                        var el = document.getElementById('scores-' + sport);
-                        if (!el) return;
-                        var games = data[sport] || [];
-                        if (games.length === 0) {
-                            el.innerHTML = '<div class="no-scores">No games today</div>';
-                            return;
-                        }
-                        var html = '';
-                        games.forEach(function(g) {
-                            var sc = g.state === 'in' ? 'live' : (g.state === 'post' ? 'final' : 'pre');
-                            html += '<div class="score-card" onclick="openStats(\'' + sport + '\', \'' + g.event_id + '\', \'' + g.away_team.replace(/'/g, '') + ' vs ' + g.home_team.replace(/'/g, '') + '\')">';
-                            html += '<div class="score-row"><span class="score-team">' + g.away_team + '</span><span class="score-num">' + g.away_score + '</span></div>';
-                            html += '<div class="score-row"><span class="score-team">' + g.home_team + '</span><span class="score-num">' + g.home_score + '</span></div>';
-                            html += '<div class="score-status ' + sc + '">' + g.status + '</div>';
-                            html += '</div>';
-                        });
-                        el.innerHTML = html;
-                    });
-                })
-                .catch(function() {});
-        }
-
-        setInterval(refreshScores, 30000);
-        window.onload = function() {
-            switchTab('NBA');
-            refreshScores();
-        };
-    </script>
+<title>Live Odds Tracker</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#1a1a2e;color:#eee;margin:0;padding:0}
+h1{color:#e94560;text-align:center;padding:20px 0 0;margin:0}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:230px;background:#0f3460;padding:15px;overflow-y:auto;flex-shrink:0}
+.sidebar h2{color:#e94560;font-size:1em;margin:0 0 10px;border-bottom:1px solid #e94560;padding-bottom:6px}
+.sb-sport{color:#4ecca3;font-size:.8em;font-weight:bold;margin:10px 0 5px}
+.sc{background:#16213e;border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:.82em;cursor:pointer}
+.sc:hover{background:#1e3a6e}
+.sr{display:flex;justify-content:space-between;margin:2px 0}
+.sn{color:#4ecca3;font-weight:bold}
+.ss{font-size:.75em;margin-top:3px}
+.live{color:#4ecca3}.final{color:#888}.pre{color:#aaa}
+.no-sc{color:#888;font-size:.82em;font-style:italic}
+.main{flex:1;padding:0 20px 20px;min-width:0}
+.tabs{display:flex;gap:10px;margin:20px 0 10px;justify-content:center}
+.tab{background:#0f3460;color:#eee;border:none;padding:10px 30px;border-radius:5px;cursor:pointer;font-size:1.1em;font-weight:bold}
+.tab:hover{background:#c73652}
+.tab.active{background:#e94560}
+.tc{display:none}
+.tc.active{display:block}
+.nav{display:flex;justify-content:center;align-items:center;gap:20px;margin:15px 0}
+.nav a button,.nav button{background:#0f3460;color:#eee;border:none;padding:8px 18px;border-radius:5px;cursor:pointer;font-size:.95em}
+.nav a button:hover,.nav button:hover{background:#e94560}
+.nav button:disabled{background:#333;cursor:not-allowed}
+.dt{color:#e94560;font-size:1.4em}
+.game{background:#16213e;border-radius:8px;padding:15px;margin:10px 0}
+.gt{font-size:1.05em;font-weight:bold;margin-bottom:5px;color:#fff;cursor:pointer}
+.gt:hover{color:#4ecca3}
+.gtime{color:#888;font-size:.85em;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;margin-bottom:10px}
+th{background:#0f3460;padding:7px 8px;text-align:left;font-size:.82em}
+td{padding:7px 8px;border-bottom:1px solid #0f3460;font-size:.82em}
+.pos{color:#4ecca3}.neg{color:#e94560}
+.bl{color:#4ecca3;text-decoration:none;font-weight:bold}
+.bl:hover{text-decoration:underline}
+.bp{background:#0f3460;color:#eee;border:none;padding:6px 13px;border-radius:5px;cursor:pointer;font-size:.83em;margin-top:8px}
+.bp:hover{background:#e94560}
+.ps{display:none;margin-top:12px}
+.ps.open{display:block}
+.pc{color:#4ecca3;font-size:.9em;margin:10px 0 4px;font-weight:bold;border-bottom:1px solid #4ecca3;padding-bottom:2px}
+.ref{text-align:center;color:#888;font-size:.8em;margin-top:20px}
+.ld{color:#888;font-size:.85em;font-style:italic;padding:8px 0}
+.ng{color:#888;text-align:center;padding:30px;font-style:italic}
+.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px}
+.mo.open{display:flex}
+.md{background:#16213e;border-radius:10px;padding:25px;max-width:950px;width:100%;position:relative}
+.mc{position:absolute;top:12px;right:12px;background:#e94560;border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.95em}
+.mt{color:#e94560;font-size:1.2em;font-weight:bold;margin-bottom:15px}
+.mteam{color:#4ecca3;font-size:.95em;font-weight:bold;margin:14px 0 6px}
+.sw{overflow-x:auto}
+.st{border-collapse:collapse;font-size:.78em;min-width:100%}
+.st th{background:#0f3460;padding:5px 8px;white-space:nowrap;text-align:left}
+.st td{padding:5px 8px;border-bottom:1px solid #0f3460;white-space:nowrap}
+</style>
+<script>
+function switchTab(sport){
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.tc').forEach(function(c){c.classList.remove('active')});
+  document.getElementById('c-'+sport).classList.add('active');
+  document.getElementById('t-'+sport).classList.add('active');
+}
+function toggleProps(id,sk,eid){
+  var s=document.getElementById('ps-'+id);
+  var b=document.getElementById('bp-'+id);
+  if(s.classList.contains('open')){s.classList.remove('open');b.textContent='Show Props';return}
+  s.classList.add('open');b.textContent='Hide Props';
+  if(s.dataset.loaded)return;
+  s.dataset.loaded='1';
+  s.innerHTML='<div class="ld">Loading...</div>';
+  fetch('/props?sport='+encodeURIComponent(sk)+'&event_id='+encodeURIComponent(eid))
+    .then(function(r){return r.json()})
+    .then(function(data){
+      var k=Object.keys(data);
+      if(!k.length){s.innerHTML='<div class="ld">No props yet.</div>';return}
+      var h='';
+      k.forEach(function(m){
+        h+='<div class="pc">'+m+'</div>';
+        h+='<table><tr><th>Bet</th><th>Avg</th><th>Best</th><th>Book</th><th>#</th></tr>';
+        Object.keys(data[m]).forEach(function(bet){
+          var d=data[m][bet];
+          h+='<tr><td>'+bet+'</td>';
+          h+='<td class="'+(d.average>0?'pos':'neg')+'">'+(d.average>0?'+':'')+d.average+'</td>';
+          h+='<td class="'+(d.best>0?'pos':'neg')+'">'+(d.best>0?'+':'')+d.best+'</td>';
+          h+='<td><a href="'+d.best_link+'" target="_blank" class="bl">'+d.best_book+'</a></td>';
+          h+='<td>'+d.books+'</td></tr>';
+        });
+        h+='</table>';
+      });
+      s.innerHTML=h;
+    })
+    .catch(function(){s.innerHTML='<div class="ld">Error loading props.</div>'});
+}
+function openStats(sport,eid,title){
+  var mo=document.getElementById('modal');
+  document.getElementById('mtitle').textContent=title;
+  document.getElementById('mbody').innerHTML='<div class="ld">Loading stats...</div>';
+  mo.classList.add('open');
+  if(!eid){document.getElementById('mbody').innerHTML='<div class="ld">No event ID.</div>';return}
+  fetch('/game_stats?sport='+encodeURIComponent(sport)+'&event_id='+encodeURIComponent(eid))
+    .then(function(r){return r.json()})
+    .then(function(data){
+      if(!data.teams||!data.teams.length){document.getElementById('mbody').innerHTML='<div class="ld">Stats not available yet.</div>';return}
+      var h='';
+      data.teams.forEach(function(team){
+        if(!team.players||!team.players.length)return;
+        h+='<div class="mteam">'+team.name+'</div>';
+        h+='<div class="sw"><table class="st"><tr><th>Player</th>';
+        data.labels.forEach(function(l){h+='<th>'+l+'</th>'});
+        h+='</tr>';
+        team.players.forEach(function(p){
+          h+='<tr><td>'+p.name+'</td>';
+          data.labels.forEach(function(l){h+='<td>'+(p.stats[l]||'-')+'</td>'});
+          h+='</tr>';
+        });
+        h+='</table></div>';
+      });
+      document.getElementById('mbody').innerHTML=h||'<div class="ld">No stats yet.</div>';
+    })
+    .catch(function(){document.getElementById('mbody').innerHTML='<div class="ld">Error.</div>'});
+}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function refreshScores(){
+  fetch('/scores')
+    .then(function(r){return r.json()})
+    .then(function(data){
+      ['NBA','NFL'].forEach(function(sport){
+        var el=document.getElementById('sc-'+sport);
+        if(!el)return;
+        var games=data[sport]||[];
+        if(!games.length){el.innerHTML='<div class="no-sc">No games today</div>';return}
+        var h='';
+        games.forEach(function(g){
+          var sc=g.state==='in'?'live':(g.state==='post'?'final':'pre');
+          var at=g.away_team.replace(/'/g,'');
+          var ht=g.home_team.replace(/'/g,'');
+          h+='<div class="sc" onclick="openStats(\''+sport+'\',\''+g.event_id+'\',\''+at+' vs '+ht+'\')">';
+          h+='<div class="sr"><span>'+g.away_team+'</span><span class="sn">'+g.away_score+'</span></div>';
+          h+='<div class="sr"><span>'+g.home_team+'</span><span class="sn">'+g.home_score+'</span></div>';
+          h+='<div class="ss '+sc+'">'+g.status+'</div>';
+          h+='</div>';
+        });
+        el.innerHTML=h;
+      });
+    }).catch(function(){});
+}
+setInterval(refreshScores,30000);
+window.onload=function(){refreshScores()};
+</script>
 </head>
 <body>
-    <h1>🏀🏈 Live Odds Tracker</h1>
+<h1>Live Odds Tracker</h1>
 
-    <div class="modal-overlay" id="stats-modal" onclick="if(event.target===this)closeModal()">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal()">x</button>
-            <div class="modal-title" id="modal-title"></div>
-            <div id="modal-body"></div>
-        </div>
+<div class="mo" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="md">
+    <button class="mc" onclick="closeModal()">x</button>
+    <div class="mt" id="mtitle"></div>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <h2>Live Scores</h2>
+    <div class="sb-sport">NBA</div>
+    <div id="sc-NBA"><div class="no-sc">Loading...</div></div>
+    <div class="sb-sport">NFL</div>
+    <div id="sc-NFL"><div class="no-sc">Loading...</div></div>
+  </div>
+  <div class="main">
+    <div class="tabs">
+      <button class="tab active" id="t-NBA" onclick="switchTab('NBA')">NBA</button>
+      <button class="tab" id="t-NFL" onclick="switchTab('NFL')">NFL</button>
     </div>
 
-    <div class="layout">
-        <div class="sidebar">
-            <h2>Live Scores</h2>
-            <div class="sidebar-sport">NBA</div>
-            <div id="scores-NBA"><div class="no-scores">Loading...</div></div>
-            <div class="sidebar-sport">NFL</div>
-            <div id="scores-NFL"><div class="no-scores">Loading...</div></div>
+    <div class="tc active" id="c-NBA">
+      <div class="nav">
+        {% if nba_day > 0 %}<a href="/?sport=NBA&day={{ nba_day - 1 }}"><button>Prev</button></a>{% else %}<button disabled>Prev</button>{% endif %}
+        <div class="dt">{{ nba_date }}</div>
+        {% if nba_day < nba_total - 1 %}<a href="/?sport=NBA&day={{ nba_day + 1 }}"><button>Next</button></a>{% else %}<button disabled>Next</button>{% endif %}
+      </div>
+      {% if nba_games %}
+        {% for game in nba_games %}
+        <div class="game">
+          <div class="gt" onclick="openStats('NBA','{{ game['event_id'] }}','{{ game['away'] }} vs {{ game['home'] }}')">
+            {{ game['away'] }} vs {{ game['home'] }} <span style="color:#4ecca3;font-size:.75em">click for stats</span>
+          </div>
+          <div class="gtime">{{ game['time'] }}</div>
+          <table>
+            <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best</th><th>Best Book</th><th>#</th></tr>
+            {% for team, d in game['teams'].items() %}
+            <tr>
+              <td>{{ team }}</td>
+              <td class="pos">{{ d['win_prob'] }}%</td>
+              <td class="{{ 'pos' if d['average'] > 0 else 'neg' }}">{{ '+' if d['average'] > 0 else '' }}{{ d['average'] }}</td>
+              <td class="{{ 'pos' if d['best'] > 0 else 'neg' }}">{{ '+' if d['best'] > 0 else '' }}{{ d['best'] }}</td>
+              <td><a href="{{ d['best_link'] }}" target="_blank" class="bl">{{ d['best_book'] }}</a></td>
+              <td>{{ d['books'] }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          <button class="bp" id="bp-nba-{{ loop.index }}" onclick="toggleProps('nba-{{ loop.index }}','{{ game['sport_key'] }}','{{ game['event_id'] }}')">Show Props</button>
+          <div class="ps" id="ps-nba-{{ loop.index }}"></div>
         </div>
-        <div class="main">
-            <div class="sport-tabs">
-                <button class="tab-btn" id="tab-NBA" onclick="switchTab('NBA')">NBA</button>
-                <button class="tab-btn" id="tab-NFL" onclick="switchTab('NFL')">NFL</button>
-            </div>
-
-            <div class="tab-content" id="content-NBA">
-                <div class="nav">
-                    {% if nba_day > 0 %}
-                        <a href="/?sport=NBA&day={{ nba_day - 1 }}"><button>Prev Day</button></a>
-                    {% else %}
-                        <button disabled>Prev Day</button>
-                    {% endif %}
-                    <div class="date-title">{{ nba_date }}</div>
-                    {% if nba_day < nba_total - 1 %}
-                        <a href="/?sport=NBA&day={{ nba_day + 1 }}"><button>Next Day</button></a>
-                    {% else %}
-                        <button disabled>Next Day</button>
-                    {% endif %}
-                </div>
-                {% if nba_games %}
-                    {% for game in nba_games %}
-                    <div class="game">
-                        <div class="game-title" onclick="openStats('NBA', '', '{{ game["away"] }} vs {{ game["home"] }}')">
-                            {{ game["away"] }} vs {{ game["home"] }} &nbsp;<span style="color:#4ecca3;font-size:0.75em;">click for stats</span>
-                        </div>
-                        <div class="game-time">{{ game["time"] }}</div>
-                        <table>
-                            <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best Line</th><th>Best Book</th><th>Books</th></tr>
-                            {% for team, d in game["teams"].items() %}
-                            <tr>
-                                <td>{{ team }}</td>
-                                <td class="positive">{{ d.win_prob }}%</td>
-                                <td class="{{ 'positive' if d.average > 0 else 'negative' }}">{{ '+' if d.average > 0 else '' }}{{ d.average }}</td>
-                                <td class="{{ 'positive' if d.best > 0 else 'negative' }}">{{ '+' if d.best > 0 else '' }}{{ d.best }}</td>
-                                <td><a href="{{ d.best_link }}" target="_blank" class="book-link">{{ d.best_book }}</a></td>
-                                <td>{{ d.books }}</td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        <button class="btn-props" id="btn-nba-{{ loop.index }}" onclick="toggleProps('nba-{{ loop.index }}', '{{ game["sport_key"] }}', '{{ game["event_id"] }}')">Show Player Props</button>
-                        <div class="props-section" id="props-nba-{{ loop.index }}"></div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="no-games">No NBA games on this date.</div>
-                {% endif %}
-            </div>
-
-            <div class="tab-content" id="content-NFL">
-                <div class="nav">
-                    {% if nfl_day > 0 %}
-                        <a href="/?sport=NFL&day={{ nfl_day - 1 }}"><button>Prev Day</button></a>
-                    {% else %}
-                        <button disabled>Prev Day</button>
-                    {% endif %}
-                    <div class="date-title">{{ nfl_date }}</div>
-                    {% if nfl_day < nfl_total - 1 %}
-                        <a href="/?sport=NFL&day={{ nfl_day + 1 }}"><button>Next Day</button></a>
-                    {% else %}
-                        <button disabled>Next Day</button>
-                    {% endif %}
-                </div>
-                {% if nfl_games %}
-                    {% for game in nfl_games %}
-                    <div class="game">
-                        <div class="game-title" onclick="openStats('NFL', '', '{{ game["away"] }} vs {{ game["home"] }}')">
-                            {{ game["away"] }} vs {{ game["home"] }} &nbsp;<span style="color:#4ecca3;font-size:0.75em;">click for stats</span>
-                        </div>
-                        <div class="game-time">{{ game["time"] }}</div>
-                        <table>
-                            <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best Line</th><th>Best Book</th><th>Books</th></tr>
-                            {% for team, d in game["teams"].items() %}
-                            <tr>
-                                <td>{{ team }}</td>
-                                <td class="positive">{{ d.win_prob }}%</td>
-                                <td class="{{ 'positive' if d.average > 0 else 'negative' }}">{{ '+' if d.average > 0 else '' }}{{ d.average }}</td>
-                                <td class="{{ 'positive' if d.best > 0 else 'negative' }}">{{ '+' if d.best > 0 else '' }}{{ d.best }}</td>
-                                <td><a href="{{ d.best_link }}" target="_blank" class="book-link">{{ d.best_book }}</a></td>
-                                <td>{{ d.books }}</td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-                        <button class="btn-props" id="btn-nfl-{{ loop.index }}" onclick="toggleProps('nfl-{{ loop.index }}', '{{ game["sport_key"] }}', '{{ game["event_id"] }}')">Show Player Props</button>
-                        <div class="props-section" id="props-nfl-{{ loop.index }}"></div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="no-games">No NFL games on this date.</div>
-                {% endif %}
-            </div>
-
-            <div class="refresh">Odds update every 10 minutes &middot; Scores update every 30 seconds</div>
-        </div>
+        {% endfor %}
+      {% else %}
+        <div class="ng">No NBA games on this date.</div>
+      {% endif %}
     </div>
+
+    <div class="tc" id="c-NFL">
+      <div class="nav">
+        {% if nfl_day > 0 %}<a href="/?sport=NFL&day={{ nfl_day - 1 }}"><button>Prev</button></a>{% else %}<button disabled>Prev</button>{% endif %}
+        <div class="dt">{{ nfl_date }}</div>
+        {% if nfl_day < nfl_total - 1 %}<a href="/?sport=NFL&day={{ nfl_day + 1 }}"><button>Next</button></a>{% else %}<button disabled>Next</button>{% endif %}
+      </div>
+      {% if nfl_games %}
+        {% for game in nfl_games %}
+        <div class="game">
+          <div class="gt" onclick="openStats('NFL','{{ game['event_id'] }}','{{ game['away'] }} vs {{ game['home'] }}')">
+            {{ game['away'] }} vs {{ game['home'] }} <span style="color:#4ecca3;font-size:.75em">click for stats</span>
+          </div>
+          <div class="gtime">{{ game['time'] }}</div>
+          <table>
+            <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best</th><th>Best Book</th><th>#</th></tr>
+            {% for team, d in game['teams'].items() %}
+            <tr>
+              <td>{{ team }}</td>
+              <td class="pos">{{ d['win_prob'] }}%</td>
+              <td class="{{ 'pos' if d['average'] > 0 else 'neg' }}">{{ '+' if d['average'] > 0 else '' }}{{ d['average'] }}</td>
+              <td class="{{ 'pos' if d['best'] > 0 else 'neg' }}">{{ '+' if d['best'] > 0 else '' }}{{ d['best'] }}</td>
+              <td><a href="{{ d['best_link'] }}" target="_blank" class="bl">{{ d['best_book'] }}</a></td>
+              <td>{{ d['books'] }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+          <button class="bp" id="bp-nfl-{{ loop.index }}" onclick="toggleProps('nfl-{{ loop.index }}','{{ game['sport_key'] }}','{{ game['event_id'] }}')">Show Props</button>
+          <div class="ps" id="ps-nfl-{{ loop.index }}"></div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="ng">No NFL games on this date.</div>
+      {% endif %}
+    </div>
+
+    <div class="ref">Odds update every 10 min &middot; Scores update every 30 sec</div>
+  </div>
+</div>
 </body>
 </html>"""
 
@@ -531,22 +460,16 @@ HTML = """<!DOCTYPE html>
 def index():
     all_odds = get_odds()
     sport_param = request.args.get("sport", "NBA")
-
     nba_dates = list(all_odds["NBA"].keys())
     nfl_dates = list(all_odds["NFL"].keys())
-
     nba_day = int(request.args.get("day", 0)) if sport_param == "NBA" else 0
     nfl_day = int(request.args.get("day", 0)) if sport_param == "NFL" else 0
-
     nba_day = max(0, min(nba_day, len(nba_dates) - 1)) if nba_dates else 0
     nfl_day = max(0, min(nfl_day, len(nfl_dates) - 1)) if nfl_dates else 0
-
     nba_date = nba_dates[nba_day] if nba_dates else "No Games"
     nfl_date = nfl_dates[nfl_day] if nfl_dates else "No Games"
-
     nba_games = all_odds["NBA"].get(nba_date, [])
     nfl_games = all_odds["NFL"].get(nfl_date, [])
-
     return render_template_string(HTML,
         nba_games=nba_games, nba_date=nba_date, nba_day=nba_day, nba_total=max(len(nba_dates), 1),
         nfl_games=nfl_games, nfl_date=nfl_date, nfl_day=nfl_day, nfl_total=max(len(nfl_dates), 1)
@@ -569,6 +492,16 @@ def props():
     sport = request.args.get("sport", "")
     event_id = request.args.get("event_id", "")
     return jsonify(get_props(sport, event_id))
+
+@app.route("/debug")
+def debug():
+    try:
+        r = requests.get("https://api.the-odds-api.com/v4/sports/basketball_nba/odds",
+            params={"apiKey": API_KEY, "regions": "us", "markets": "h2h", "oddsFormat": "american"}, timeout=10)
+        data = r.json()
+        return jsonify({"status": r.status_code, "game_count": len(data), "first": data[0] if data else None})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 @app.route("/testdata")
 def testdata():
