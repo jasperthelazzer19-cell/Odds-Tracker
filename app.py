@@ -1,6 +1,7 @@
 from flask import Flask, render_template_string, request, jsonify
 import requests
 from datetime import datetime
+import zoneinfo
 
 app = Flask(__name__)
 
@@ -103,9 +104,9 @@ def get_odds():
             commence = game.get("commence_time", "")
             try:
                 dt = datetime.fromisoformat(commence.replace("Z", "+00:00"))
-                local_dt = dt.astimezone()
+                local_dt = dt.astimezone(zoneinfo.ZoneInfo("America/Los_Angeles"))
                 date_str = local_dt.strftime("%A, %B %d")
-                time_str = local_dt.strftime("%I:%M %p")
+                time_str = local_dt.strftime("%I:%M %p PT")
             except:
                 date_str = "Unknown Date"
                 time_str = ""
@@ -139,12 +140,14 @@ def get_odds():
                 best_odds = max(odds_list)
                 best_book = max(team_book_odds[team], key=lambda b: team_book_odds[team][b])
                 best_link = BOOK_LINKS.get(best_book, "#")
+                implied_prob = round((1 / avg_decimal) * 100, 1)
                 game_data["teams"][team] = {
                     "average": avg_american,
                     "best": best_odds,
                     "best_book": best_book,
                     "best_link": best_link,
-                    "books": len(odds_list)
+                    "books": len(odds_list),
+                    "win_prob": implied_prob
                 }
 
             if date_str not in games_by_date:
@@ -260,10 +263,11 @@ HTML = """
             <div class="game-title">{{ game['away'] }} vs {{ game['home'] }}</div>
             <div class="game-time">🕐 {{ game['time'] }}</div>
             <table>
-                <tr><th>Team</th><th>Average</th><th>Best Line</th><th>Best Book</th><th>Books</th></tr>
+                <tr><th>Team</th><th>Win %</th><th>Average</th><th>Best Line</th><th>Best Book</th><th>Books</th></tr>
                 {% for team, data in game['teams'].items() %}
                 <tr>
                     <td>{{ team }}</td>
+                    <td class="positive">{{ data['win_prob'] }}%</td>
                     <td class="{{ 'positive' if data['average'] > 0 else 'negative' }}">{{ '+' if data['average'] > 0 else '' }}{{ data['average'] }}</td>
                     <td class="{{ 'positive' if data['best'] > 0 else 'negative' }}">{{ '+' if data['best'] > 0 else '' }}{{ data['best'] }}</td>
                     <td><a href="{{ data['best_link'] }}" target="_blank" class="book-link">{{ data['best_book'] }}</a></td>
@@ -277,7 +281,7 @@ HTML = """
             <div class="props-section" id="props-{{ loop.index }}"></div>
         </div>
     {% endfor %}
-    <div class="refresh">Data updates every 60 seconds</div>
+    <div class="refresh">Data updates every 10 minutes</div>
 </body>
 </html>
 """
