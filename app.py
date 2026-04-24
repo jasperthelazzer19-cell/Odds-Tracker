@@ -263,7 +263,7 @@ td{padding:7px 8px;border-bottom:1px solid #0f3460;font-size:.82em}
 </style>
 <script>
 // All game data stored in JS — no inline string interpolation in onclick
-var GAMES = {{ games_json }};
+var GAMES = {{ games_json | safe }};
 
 function switchTab(sport) {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
