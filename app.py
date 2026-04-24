@@ -452,13 +452,13 @@ HTML = """<!DOCTYPE html>
                 {% if nba_games %}
                     {% for game in nba_games %}
                     <div class="game">
-                        <div class="game-title" onclick="openStats('NBA', '', '{{ game.away }} vs {{ game.home }}')">
-                            {{ game.away }} vs {{ game.home }} &nbsp;<span style="color:#4ecca3;font-size:0.75em;">click for stats</span>
+                        <div class="game-title" onclick="openStats('NBA', '', '{{ game["away"] }} vs {{ game["home"] }}')">
+                            {{ game["away"] }} vs {{ game["home"] }} &nbsp;<span style="color:#4ecca3;font-size:0.75em;">click for stats</span>
                         </div>
-                        <div class="game-time">{{ game.time }}</div>
+                        <div class="game-time">{{ game["time"] }}</div>
                         <table>
                             <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best Line</th><th>Best Book</th><th>Books</th></tr>
-                            {% for team, d in game.teams.items() %}
+                            {% for team, d in game["teams"].items() %}
                             <tr>
                                 <td>{{ team }}</td>
                                 <td class="positive">{{ d.win_prob }}%</td>
@@ -469,7 +469,7 @@ HTML = """<!DOCTYPE html>
                             </tr>
                             {% endfor %}
                         </table>
-                        <button class="btn-props" id="btn-nba-{{ loop.index }}" onclick="toggleProps('nba-{{ loop.index }}', '{{ game.sport_key }}', '{{ game.event_id }}')">Show Player Props</button>
+                        <button class="btn-props" id="btn-nba-{{ loop.index }}" onclick="toggleProps('nba-{{ loop.index }}', '{{ game["sport_key"] }}', '{{ game["event_id"] }}')">Show Player Props</button>
                         <div class="props-section" id="props-nba-{{ loop.index }}"></div>
                     </div>
                     {% endfor %}
@@ -495,13 +495,13 @@ HTML = """<!DOCTYPE html>
                 {% if nfl_games %}
                     {% for game in nfl_games %}
                     <div class="game">
-                        <div class="game-title" onclick="openStats('NFL', '', '{{ game.away }} vs {{ game.home }}')">
-                            {{ game.away }} vs {{ game.home }} &nbsp;<span style="color:#4ecca3;font-size:0.75em;">click for stats</span>
+                        <div class="game-title" onclick="openStats('NFL', '', '{{ game["away"] }} vs {{ game["home"] }}')">
+                            {{ game["away"] }} vs {{ game["home"] }} &nbsp;<span style="color:#4ecca3;font-size:0.75em;">click for stats</span>
                         </div>
-                        <div class="game-time">{{ game.time }}</div>
+                        <div class="game-time">{{ game["time"] }}</div>
                         <table>
                             <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best Line</th><th>Best Book</th><th>Books</th></tr>
-                            {% for team, d in game.teams.items() %}
+                            {% for team, d in game["teams"].items() %}
                             <tr>
                                 <td>{{ team }}</td>
                                 <td class="positive">{{ d.win_prob }}%</td>
@@ -512,7 +512,7 @@ HTML = """<!DOCTYPE html>
                             </tr>
                             {% endfor %}
                         </table>
-                        <button class="btn-props" id="btn-nfl-{{ loop.index }}" onclick="toggleProps('nfl-{{ loop.index }}', '{{ game.sport_key }}', '{{ game.event_id }}')">Show Player Props</button>
+                        <button class="btn-props" id="btn-nfl-{{ loop.index }}" onclick="toggleProps('nfl-{{ loop.index }}', '{{ game["sport_key"] }}', '{{ game["event_id"] }}')">Show Player Props</button>
                         <div class="props-section" id="props-nfl-{{ loop.index }}"></div>
                     </div>
                     {% endfor %}
@@ -569,12 +569,6 @@ def props():
     sport = request.args.get("sport", "")
     event_id = request.args.get("event_id", "")
     return jsonify(get_props(sport, event_id))
-@app.route("/debug")
-def debug():
-    try:
-        r = requests.get("https://api.the-odds-api.com/v4/sports", params={"apiKey": API_KEY}, timeout=10)
-        return jsonify({"status": r.status_code, "body": r.json()})
-    except Exception as e:
-        return jsonify({"error": str(e)})
+
 if __name__ == "__main__":
     app.run(debug=True)
