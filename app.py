@@ -5,7 +5,7 @@ import zoneinfo
 
 app = Flask(__name__)
 
-API_KEY = "95241e6f109df18872f24710e846ef80"
+API_KEY = "1cbed467fdd475e6e2816804ad864e83"
 SPORTS = ["americanfootball_nfl", "basketball_nba"]
 
 BOOK_LINKS = {
