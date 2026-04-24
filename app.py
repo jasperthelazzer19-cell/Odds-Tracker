@@ -570,5 +570,12 @@ def props():
     event_id = request.args.get("event_id", "")
     return jsonify(get_props(sport, event_id))
 
+@app.route("/testdata")
+def testdata():
+    all_odds = get_odds()
+    nba_dates = list(all_odds["NBA"].keys())
+    nba_games = all_odds["NBA"].get(nba_dates[0], []) if nba_dates else []
+    return jsonify({"dates": nba_dates, "game_count": len(nba_games), "first_game": nba_games[0] if nba_games else None})
+
 if __name__ == "__main__":
     app.run(debug=True)
