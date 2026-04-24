@@ -2,6 +2,7 @@ from flask import Flask, render_template_string, request, jsonify
 import requests
 from datetime import datetime
 import zoneinfo
+import json
 
 app = Flask(__name__)
 
@@ -261,6 +262,9 @@ td{padding:7px 8px;border-bottom:1px solid #0f3460;font-size:.82em}
 .stats-tbl td{padding:5px 8px;border-bottom:1px solid #0f3460;white-space:nowrap}
 </style>
 <script>
+// All game data stored in JS — no inline string interpolation in onclick
+var GAMES = {{ games_json }};
+
 function switchTab(sport) {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
     document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
@@ -268,8 +272,12 @@ function switchTab(sport) {
     document.getElementById('tab-' + sport).classList.add('active');
 }
 
-function toggleProps(btn, propBodyId, sportKey, eventId) {
-    var body = document.getElementById(propBodyId);
+function toggleProps(idx, sport) {
+    var game = GAMES[sport][idx];
+    var bodyId = 'props-' + sport + '-' + idx;
+    var btnId = 'propbtn-' + sport + '-' + idx;
+    var body = document.getElementById(bodyId);
+    var btn = document.getElementById(btnId);
     if (body.classList.contains('open')) {
         body.classList.remove('open');
         btn.textContent = 'Show Props';
@@ -280,7 +288,7 @@ function toggleProps(btn, propBodyId, sportKey, eventId) {
     if (body.dataset.loaded) return;
     body.dataset.loaded = '1';
     body.innerHTML = '<div class="ld">Loading...</div>';
-    fetch('/props?sport=' + encodeURIComponent(sportKey) + '&event_id=' + encodeURIComponent(eventId))
+    fetch('/props?sport=' + encodeURIComponent(game.sport_key) + '&event_id=' + encodeURIComponent(game.event_id))
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var keys = Object.keys(data);
@@ -304,18 +312,19 @@ function toggleProps(btn, propBodyId, sportKey, eventId) {
         .catch(function() { body.innerHTML = '<div class="ld">Error.</div>'; });
 }
 
-function openStats(sport, eventId) {
+function openStats(idx, sport) {
+    var game = GAMES[sport][idx];
     var modal = document.getElementById('stats-modal');
-    var title = document.getElementById('modal-game-title');
-    var body = document.getElementById('modal-game-body');
-    title.textContent = document.getElementById('game-title-' + sport + '-' + eventId).dataset.title;
-    body.innerHTML = '<div class="ld">Loading stats...</div>';
+    document.getElementById('modal-game-title').textContent = game.away + ' vs ' + game.home;
+    document.getElementById('modal-game-body').innerHTML = '<div class="ld">Loading stats...</div>';
     modal.classList.add('open');
-    if (!eventId) { body.innerHTML = '<div class="ld">No event ID.</div>'; return; }
-    fetch('/game_stats?sport=' + encodeURIComponent(sport) + '&event_id=' + encodeURIComponent(eventId))
+    fetch('/game_stats?sport=' + encodeURIComponent(sport) + '&event_id=' + encodeURIComponent(game.event_id))
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (!data.teams || !data.teams.length) { body.innerHTML = '<div class="ld">Stats not available yet.</div>'; return; }
+            if (!data.teams || !data.teams.length) {
+                document.getElementById('modal-game-body').innerHTML = '<div class="ld">Stats not available yet.</div>';
+                return;
+            }
             var h = '';
             data.teams.forEach(function(team) {
                 if (!team.players || !team.players.length) return;
@@ -330,9 +339,9 @@ function openStats(sport, eventId) {
                 });
                 h += '</table></div>';
             });
-            body.innerHTML = h || '<div class="ld">No stats yet.</div>';
+            document.getElementById('modal-game-body').innerHTML = h || '<div class="ld">No stats yet.</div>';
         })
-        .catch(function() { body.innerHTML = '<div class="ld">Error.</div>'; });
+        .catch(function() { document.getElementById('modal-game-body').innerHTML = '<div class="ld">Error.</div>'; });
 }
 
 function closeModal() { document.getElementById('stats-modal').classList.remove('open'); }
@@ -347,51 +356,72 @@ function refreshScores() {
                 var games = data[sport] || [];
                 if (!games.length) { el.innerHTML = '<div class="no-sc">No games today</div>'; return; }
                 var h = '';
-                games.forEach(function(g) {
+                games.forEach(function(g, i) {
                     var sc = g.state === 'in' ? 'live' : (g.state === 'post' ? 'final' : 'pre');
-                    h += '<div class="sc-card" onclick="openScoreStats(\'' + sport + '\',\'' + g.event_id + '\')">';
+                    h += '<div class="sc-card" data-sport="' + sport + '" data-eid="' + g.event_id + '" data-away="' + g.away_team + '" data-home="' + g.home_team + '">';
                     h += '<div class="sc-row"><span>' + g.away_team + '</span><span class="sc-num">' + g.away_score + '</span></div>';
                     h += '<div class="sc-row"><span>' + g.home_team + '</span><span class="sc-num">' + g.home_score + '</span></div>';
                     h += '<div class="sc-status ' + sc + '">' + g.status + '</div>';
                     h += '</div>';
                 });
                 el.innerHTML = h;
+                el.querySelectorAll('.sc-card').forEach(function(card) {
+                    card.addEventListener('click', function() {
+                        var sp = this.dataset.sport;
+                        var eid = this.dataset.eid;
+                        var title = this.dataset.away + ' vs ' + this.dataset.home;
+                        var modal = document.getElementById('stats-modal');
+                        document.getElementById('modal-game-title').textContent = title;
+                        document.getElementById('modal-game-body').innerHTML = '<div class="ld">Loading stats...</div>';
+                        modal.classList.add('open');
+                        fetch('/game_stats?sport=' + encodeURIComponent(sp) + '&event_id=' + encodeURIComponent(eid))
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (!data.teams || !data.teams.length) {
+                                    document.getElementById('modal-game-body').innerHTML = '<div class="ld">Stats not available yet.</div>';
+                                    return;
+                                }
+                                var h = '';
+                                data.teams.forEach(function(team) {
+                                    if (!team.players || !team.players.length) return;
+                                    h += '<div class="modal-team">' + team.name + '</div>';
+                                    h += '<div class="tbl-wrap"><table class="stats-tbl"><tr><th>Player</th>';
+                                    data.labels.forEach(function(l) { h += '<th>' + l + '</th>'; });
+                                    h += '</tr>';
+                                    team.players.forEach(function(p) {
+                                        h += '<tr><td>' + p.name + '</td>';
+                                        data.labels.forEach(function(l) { h += '<td>' + (p.stats[l] || '-') + '</td>'; });
+                                        h += '</tr>';
+                                    });
+                                    h += '</table></div>';
+                                });
+                                document.getElementById('modal-game-body').innerHTML = h || '<div class="ld">No stats yet.</div>';
+                            })
+                            .catch(function() { document.getElementById('modal-game-body').innerHTML = '<div class="ld">Error.</div>'; });
+                    });
+                });
             });
         }).catch(function() {});
 }
 
-function openScoreStats(sport, eventId) {
-    var modal = document.getElementById('stats-modal');
-    var title = document.getElementById('modal-game-title');
-    var body = document.getElementById('modal-game-body');
-    title.textContent = sport + ' Game Stats';
-    body.innerHTML = '<div class="ld">Loading stats...</div>';
-    modal.classList.add('open');
-    fetch('/game_stats?sport=' + encodeURIComponent(sport) + '&event_id=' + encodeURIComponent(eventId))
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (!data.teams || !data.teams.length) { body.innerHTML = '<div class="ld">Stats not available yet.</div>'; return; }
-            var h = '';
-            data.teams.forEach(function(team) {
-                if (!team.players || !team.players.length) return;
-                h += '<div class="modal-team">' + team.name + '</div>';
-                h += '<div class="tbl-wrap"><table class="stats-tbl"><tr><th>Player</th>';
-                data.labels.forEach(function(l) { h += '<th>' + l + '</th>'; });
-                h += '</tr>';
-                team.players.forEach(function(p) {
-                    h += '<tr><td>' + p.name + '</td>';
-                    data.labels.forEach(function(l) { h += '<td>' + (p.stats[l] || '-') + '</td>'; });
-                    h += '</tr>';
-                });
-                h += '</table></div>';
-            });
-            body.innerHTML = h || '<div class="ld">No stats yet.</div>';
-        })
-        .catch(function() { body.innerHTML = '<div class="ld">Error.</div>'; });
-}
+// Wire up game card buttons after page load
+window.onload = function() {
+    refreshScores();
+    // Wire up stats clicks on game titles
+    document.querySelectorAll('.game-title').forEach(function(el) {
+        el.addEventListener('click', function() {
+            openStats(parseInt(this.dataset.idx), this.dataset.sport);
+        });
+    });
+    // Wire up props buttons
+    document.querySelectorAll('.props-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            toggleProps(parseInt(this.dataset.idx), this.dataset.sport);
+        });
+    });
+};
 
 setInterval(refreshScores, 30000);
-window.onload = function() { refreshScores(); };
 </script>
 </head>
 <body>
@@ -427,9 +457,8 @@ window.onload = function() { refreshScores(); };
       </div>
       {% if nba_games %}
         {% for game in nba_games %}
-        {% set gid = "nba-" ~ loop.index %}
         <div class="game-card">
-          <div class="game-title" id="game-title-NBA-{{ game['event_id'] }}" data-title="{{ game['away'] | e }} vs {{ game['home'] | e }}" onclick="openStats('NBA', '{{ game['event_id'] }}')">
+          <div class="game-title" data-idx="{{ loop.index0 }}" data-sport="NBA">
             {{ game['away'] }} vs {{ game['home'] }} <span style="color:#4ecca3;font-size:.75em">click for stats</span>
           </div>
           <div class="game-time">{{ game['time'] }}</div>
@@ -446,8 +475,8 @@ window.onload = function() { refreshScores(); };
             </tr>
             {% endfor %}
           </table>
-          <button class="props-btn" onclick="toggleProps(this, 'props-{{ gid }}', '{{ game['sport_key'] }}', '{{ game['event_id'] }}')">Show Props</button>
-          <div class="props-body" id="props-{{ gid }}"></div>
+          <button class="props-btn" id="propbtn-NBA-{{ loop.index0 }}" data-idx="{{ loop.index0 }}" data-sport="NBA">Show Props</button>
+          <div class="props-body" id="props-NBA-{{ loop.index0 }}"></div>
         </div>
         {% endfor %}
       {% else %}
@@ -463,9 +492,8 @@ window.onload = function() { refreshScores(); };
       </div>
       {% if nfl_games %}
         {% for game in nfl_games %}
-        {% set gid = "nfl-" ~ loop.index %}
         <div class="game-card">
-          <div class="game-title" id="game-title-NFL-{{ game['event_id'] }}" data-title="{{ game['away'] | e }} vs {{ game['home'] | e }}" onclick="openStats('NFL', '{{ game['event_id'] }}')">
+          <div class="game-title" data-idx="{{ loop.index0 }}" data-sport="NFL">
             {{ game['away'] }} vs {{ game['home'] }} <span style="color:#4ecca3;font-size:.75em">click for stats</span>
           </div>
           <div class="game-time">{{ game['time'] }}</div>
@@ -482,8 +510,8 @@ window.onload = function() { refreshScores(); };
             </tr>
             {% endfor %}
           </table>
-          <button class="props-btn" onclick="toggleProps(this, 'props-{{ gid }}', '{{ game['sport_key'] }}', '{{ game['event_id'] }}')">Show Props</button>
-          <div class="props-body" id="props-{{ gid }}"></div>
+          <button class="props-btn" id="propbtn-NFL-{{ loop.index0 }}" data-idx="{{ loop.index0 }}" data-sport="NFL">Show Props</button>
+          <div class="props-body" id="props-NFL-{{ loop.index0 }}"></div>
         </div>
         {% endfor %}
       {% else %}
@@ -511,9 +539,14 @@ def index():
     nfl_date = nfl_dates[nfl_day] if nfl_dates else "No Games"
     nba_games = all_odds["NBA"].get(nba_date, [])
     nfl_games = all_odds["NFL"].get(nfl_date, [])
+    
+    # Pass all game data as clean JSON to JavaScript
+    games_json = json.dumps({"NBA": nba_games, "NFL": nfl_games})
+    
     return render_template_string(HTML,
         nba_games=nba_games, nba_date=nba_date, nba_day=nba_day, nba_total=max(len(nba_dates), 1),
-        nfl_games=nfl_games, nfl_date=nfl_date, nfl_day=nfl_day, nfl_total=max(len(nfl_dates), 1)
+        nfl_games=nfl_games, nfl_date=nfl_date, nfl_day=nfl_day, nfl_total=max(len(nfl_dates), 1),
+        games_json=games_json
     )
 
 @app.route("/scores")
