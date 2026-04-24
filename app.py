@@ -569,6 +569,14 @@ def props():
     sport = request.args.get("sport", "")
     event_id = request.args.get("event_id", "")
     return jsonify(get_props(sport, event_id))
-
+@app.route("/debug")
+def debug():
+    try:
+        url = "https://api.the-odds-api.com/v4/sports/basketball_nba/odds"
+        params = {"apiKey": API_KEY, "regions": "us", "markets": "h2h", "oddsFormat": "american"}
+        r = requests.get(url, params=params, timeout=10)
+        return jsonify({"status": r.status_code, "data": r.json()})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 if __name__ == "__main__":
     app.run(debug=True)
