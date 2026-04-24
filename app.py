@@ -212,157 +212,196 @@ h1{color:#e94560;text-align:center;padding:20px 0 0;margin:0}
 .sidebar{width:230px;background:#0f3460;padding:15px;overflow-y:auto;flex-shrink:0}
 .sidebar h2{color:#e94560;font-size:1em;margin:0 0 10px;border-bottom:1px solid #e94560;padding-bottom:6px}
 .sb-sport{color:#4ecca3;font-size:.8em;font-weight:bold;margin:10px 0 5px}
-.sc{background:#16213e;border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:.82em;cursor:pointer}
-.sc:hover{background:#1e3a6e}
-.sr{display:flex;justify-content:space-between;margin:2px 0}
-.sn{color:#4ecca3;font-weight:bold}
-.ss{font-size:.75em;margin-top:3px}
+.sc-card{background:#16213e;border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:.82em;cursor:pointer}
+.sc-card:hover{background:#1e3a6e}
+.sc-row{display:flex;justify-content:space-between;margin:2px 0}
+.sc-num{color:#4ecca3;font-weight:bold}
+.sc-status{font-size:.75em;margin-top:3px}
 .live{color:#4ecca3}.final{color:#888}.pre{color:#aaa}
 .no-sc{color:#888;font-size:.82em;font-style:italic}
 .main{flex:1;padding:0 20px 20px;min-width:0}
 .tabs{display:flex;gap:10px;margin:20px 0 10px;justify-content:center}
-.tab{background:#0f3460;color:#eee;border:none;padding:10px 30px;border-radius:5px;cursor:pointer;font-size:1.1em;font-weight:bold}
-.tab:hover{background:#c73652}
-.tab.active{background:#e94560}
-.tc{display:none}
-.tc.active{display:block}
+.tab-btn{background:#0f3460;color:#eee;border:none;padding:10px 30px;border-radius:5px;cursor:pointer;font-size:1.1em;font-weight:bold}
+.tab-btn:hover{background:#c73652}
+.tab-btn.active{background:#e94560}
+.tab-content{display:none}
+.tab-content.active{display:block}
 .nav{display:flex;justify-content:center;align-items:center;gap:20px;margin:15px 0}
 .nav a button,.nav button{background:#0f3460;color:#eee;border:none;padding:8px 18px;border-radius:5px;cursor:pointer;font-size:.95em}
 .nav a button:hover,.nav button:hover{background:#e94560}
 .nav button:disabled{background:#333;cursor:not-allowed}
-.dt{color:#e94560;font-size:1.4em}
-.game{background:#16213e;border-radius:8px;padding:15px;margin:10px 0}
-.gt{font-size:1.05em;font-weight:bold;margin-bottom:5px;color:#fff;cursor:pointer}
-.gt:hover{color:#4ecca3}
-.gtime{color:#888;font-size:.85em;margin-bottom:10px}
+.date-lbl{color:#e94560;font-size:1.4em}
+.game-card{background:#16213e;border-radius:8px;padding:15px;margin:10px 0}
+.game-title{font-size:1.05em;font-weight:bold;margin-bottom:5px;color:#fff;cursor:pointer}
+.game-title:hover{color:#4ecca3}
+.game-time{color:#888;font-size:.85em;margin-bottom:10px}
 table{width:100%;border-collapse:collapse;margin-bottom:10px}
 th{background:#0f3460;padding:7px 8px;text-align:left;font-size:.82em}
 td{padding:7px 8px;border-bottom:1px solid #0f3460;font-size:.82em}
 .pos{color:#4ecca3}.neg{color:#e94560}
-.bl{color:#4ecca3;text-decoration:none;font-weight:bold}
-.bl:hover{text-decoration:underline}
-.bp{background:#0f3460;color:#eee;border:none;padding:6px 13px;border-radius:5px;cursor:pointer;font-size:.83em;margin-top:8px}
-.bp:hover{background:#e94560}
-.ps{display:none;margin-top:12px}
-.ps.open{display:block}
-.pc{color:#4ecca3;font-size:.9em;margin:10px 0 4px;font-weight:bold;border-bottom:1px solid #4ecca3;padding-bottom:2px}
+.book-a{color:#4ecca3;text-decoration:none;font-weight:bold}
+.book-a:hover{text-decoration:underline}
+.props-btn{background:#0f3460;color:#eee;border:none;padding:6px 13px;border-radius:5px;cursor:pointer;font-size:.83em;margin-top:8px}
+.props-btn:hover{background:#e94560}
+.props-body{display:none;margin-top:12px}
+.props-body.open{display:block}
+.prop-cat{color:#4ecca3;font-size:.9em;margin:10px 0 4px;font-weight:bold;border-bottom:1px solid #4ecca3;padding-bottom:2px}
 .ref{text-align:center;color:#888;font-size:.8em;margin-top:20px}
 .ld{color:#888;font-size:.85em;font-style:italic;padding:8px 0}
-.ng{color:#888;text-align:center;padding:30px;font-style:italic}
-.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px}
-.mo.open{display:flex}
-.md{background:#16213e;border-radius:10px;padding:25px;max-width:950px;width:100%;position:relative}
-.mc{position:absolute;top:12px;right:12px;background:#e94560;border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.95em}
-.mt{color:#e94560;font-size:1.2em;font-weight:bold;margin-bottom:15px}
-.mteam{color:#4ecca3;font-size:.95em;font-weight:bold;margin:14px 0 6px}
-.sw{overflow-x:auto}
-.st{border-collapse:collapse;font-size:.78em;min-width:100%}
-.st th{background:#0f3460;padding:5px 8px;white-space:nowrap;text-align:left}
-.st td{padding:5px 8px;border-bottom:1px solid #0f3460;white-space:nowrap}
+.no-games{color:#888;text-align:center;padding:30px;font-style:italic}
+.modal-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px}
+.modal-bg.open{display:flex}
+.modal-box{background:#16213e;border-radius:10px;padding:25px;max-width:950px;width:100%;position:relative}
+.modal-close{position:absolute;top:12px;right:12px;background:#e94560;border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer}
+.modal-title{color:#e94560;font-size:1.2em;font-weight:bold;margin-bottom:15px}
+.modal-team{color:#4ecca3;font-size:.95em;font-weight:bold;margin:14px 0 6px}
+.tbl-wrap{overflow-x:auto}
+.stats-tbl{border-collapse:collapse;font-size:.78em;min-width:100%}
+.stats-tbl th{background:#0f3460;padding:5px 8px;white-space:nowrap;text-align:left}
+.stats-tbl td{padding:5px 8px;border-bottom:1px solid #0f3460;white-space:nowrap}
 </style>
 <script>
-function switchTab(sport){
-  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active')});
-  document.querySelectorAll('.tc').forEach(function(c){c.classList.remove('active')});
-  document.getElementById('c-'+sport).classList.add('active');
-  document.getElementById('t-'+sport).classList.add('active');
+function switchTab(sport) {
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+    document.getElementById('content-' + sport).classList.add('active');
+    document.getElementById('tab-' + sport).classList.add('active');
 }
-function toggleProps(id,sk,eid){
-  var s=document.getElementById('ps-'+id);
-  var b=document.getElementById('bp-'+id);
-  if(s.classList.contains('open')){s.classList.remove('open');b.textContent='Show Props';return}
-  s.classList.add('open');b.textContent='Hide Props';
-  if(s.dataset.loaded)return;
-  s.dataset.loaded='1';
-  s.innerHTML='<div class="ld">Loading...</div>';
-  fetch('/props?sport='+encodeURIComponent(sk)+'&event_id='+encodeURIComponent(eid))
-    .then(function(r){return r.json()})
-    .then(function(data){
-      var k=Object.keys(data);
-      if(!k.length){s.innerHTML='<div class="ld">No props yet.</div>';return}
-      var h='';
-      k.forEach(function(m){
-        h+='<div class="pc">'+m+'</div>';
-        h+='<table><tr><th>Bet</th><th>Avg</th><th>Best</th><th>Book</th><th>#</th></tr>';
-        Object.keys(data[m]).forEach(function(bet){
-          var d=data[m][bet];
-          h+='<tr><td>'+bet+'</td>';
-          h+='<td class="'+(d.average>0?'pos':'neg')+'">'+(d.average>0?'+':'')+d.average+'</td>';
-          h+='<td class="'+(d.best>0?'pos':'neg')+'">'+(d.best>0?'+':'')+d.best+'</td>';
-          h+='<td><a href="'+d.best_link+'" target="_blank" class="bl">'+d.best_book+'</a></td>';
-          h+='<td>'+d.books+'</td></tr>';
-        });
-        h+='</table>';
-      });
-      s.innerHTML=h;
-    })
-    .catch(function(){s.innerHTML='<div class="ld">Error loading props.</div>'});
+
+function toggleProps(btn, propBodyId, sportKey, eventId) {
+    var body = document.getElementById(propBodyId);
+    if (body.classList.contains('open')) {
+        body.classList.remove('open');
+        btn.textContent = 'Show Props';
+        return;
+    }
+    body.classList.add('open');
+    btn.textContent = 'Hide Props';
+    if (body.dataset.loaded) return;
+    body.dataset.loaded = '1';
+    body.innerHTML = '<div class="ld">Loading...</div>';
+    fetch('/props?sport=' + encodeURIComponent(sportKey) + '&event_id=' + encodeURIComponent(eventId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var keys = Object.keys(data);
+            if (!keys.length) { body.innerHTML = '<div class="ld">No props yet.</div>'; return; }
+            var h = '';
+            keys.forEach(function(m) {
+                h += '<div class="prop-cat">' + m + '</div>';
+                h += '<table><tr><th>Bet</th><th>Avg</th><th>Best</th><th>Book</th><th>#</th></tr>';
+                Object.keys(data[m]).forEach(function(bet) {
+                    var d = data[m][bet];
+                    h += '<tr><td>' + bet + '</td>';
+                    h += '<td class="' + (d.average > 0 ? 'pos' : 'neg') + '">' + (d.average > 0 ? '+' : '') + d.average + '</td>';
+                    h += '<td class="' + (d.best > 0 ? 'pos' : 'neg') + '">' + (d.best > 0 ? '+' : '') + d.best + '</td>';
+                    h += '<td><a href="' + d.best_link + '" target="_blank" class="book-a">' + d.best_book + '</a></td>';
+                    h += '<td>' + d.books + '</td></tr>';
+                });
+                h += '</table>';
+            });
+            body.innerHTML = h;
+        })
+        .catch(function() { body.innerHTML = '<div class="ld">Error.</div>'; });
 }
-function openStats(sport,eid,title){
-  var mo=document.getElementById('modal');
-  document.getElementById('mtitle').textContent=title;
-  document.getElementById('mbody').innerHTML='<div class="ld">Loading stats...</div>';
-  mo.classList.add('open');
-  if(!eid){document.getElementById('mbody').innerHTML='<div class="ld">No event ID.</div>';return}
-  fetch('/game_stats?sport='+encodeURIComponent(sport)+'&event_id='+encodeURIComponent(eid))
-    .then(function(r){return r.json()})
-    .then(function(data){
-      if(!data.teams||!data.teams.length){document.getElementById('mbody').innerHTML='<div class="ld">Stats not available yet.</div>';return}
-      var h='';
-      data.teams.forEach(function(team){
-        if(!team.players||!team.players.length)return;
-        h+='<div class="mteam">'+team.name+'</div>';
-        h+='<div class="sw"><table class="st"><tr><th>Player</th>';
-        data.labels.forEach(function(l){h+='<th>'+l+'</th>'});
-        h+='</tr>';
-        team.players.forEach(function(p){
-          h+='<tr><td>'+p.name+'</td>';
-          data.labels.forEach(function(l){h+='<td>'+(p.stats[l]||'-')+'</td>'});
-          h+='</tr>';
-        });
-        h+='</table></div>';
-      });
-      document.getElementById('mbody').innerHTML=h||'<div class="ld">No stats yet.</div>';
-    })
-    .catch(function(){document.getElementById('mbody').innerHTML='<div class="ld">Error.</div>'});
+
+function openStats(sport, eventId) {
+    var modal = document.getElementById('stats-modal');
+    var title = document.getElementById('modal-game-title');
+    var body = document.getElementById('modal-game-body');
+    title.textContent = document.getElementById('game-title-' + sport + '-' + eventId).dataset.title;
+    body.innerHTML = '<div class="ld">Loading stats...</div>';
+    modal.classList.add('open');
+    if (!eventId) { body.innerHTML = '<div class="ld">No event ID.</div>'; return; }
+    fetch('/game_stats?sport=' + encodeURIComponent(sport) + '&event_id=' + encodeURIComponent(eventId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.teams || !data.teams.length) { body.innerHTML = '<div class="ld">Stats not available yet.</div>'; return; }
+            var h = '';
+            data.teams.forEach(function(team) {
+                if (!team.players || !team.players.length) return;
+                h += '<div class="modal-team">' + team.name + '</div>';
+                h += '<div class="tbl-wrap"><table class="stats-tbl"><tr><th>Player</th>';
+                data.labels.forEach(function(l) { h += '<th>' + l + '</th>'; });
+                h += '</tr>';
+                team.players.forEach(function(p) {
+                    h += '<tr><td>' + p.name + '</td>';
+                    data.labels.forEach(function(l) { h += '<td>' + (p.stats[l] || '-') + '</td>'; });
+                    h += '</tr>';
+                });
+                h += '</table></div>';
+            });
+            body.innerHTML = h || '<div class="ld">No stats yet.</div>';
+        })
+        .catch(function() { body.innerHTML = '<div class="ld">Error.</div>'; });
 }
-function closeModal(){document.getElementById('modal').classList.remove('open')}
-function refreshScores(){
-  fetch('/scores')
-    .then(function(r){return r.json()})
-    .then(function(data){
-      ['NBA','NFL'].forEach(function(sport){
-        var el=document.getElementById('sc-'+sport);
-        if(!el)return;
-        var games=data[sport]||[];
-        if(!games.length){el.innerHTML='<div class="no-sc">No games today</div>';return}
-        var h='';
-        games.forEach(function(g){
-          var sc=g.state==='in'?'live':(g.state==='post'?'final':'pre');
-          var at=g.away_team.replace(/'/g,'');
-          var ht=g.home_team.replace(/'/g,'');
-          h+='<div class="sc" onclick="openStats(\''+sport+'\',\''+g.event_id+'\',\''+at+' vs '+ht+'\')">';
-          h+='<div class="sr"><span>'+g.away_team+'</span><span class="sn">'+g.away_score+'</span></div>';
-          h+='<div class="sr"><span>'+g.home_team+'</span><span class="sn">'+g.home_score+'</span></div>';
-          h+='<div class="ss '+sc+'">'+g.status+'</div>';
-          h+='</div>';
-        });
-        el.innerHTML=h;
-      });
-    }).catch(function(){});
+
+function closeModal() { document.getElementById('stats-modal').classList.remove('open'); }
+
+function refreshScores() {
+    fetch('/scores')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            ['NBA', 'NFL'].forEach(function(sport) {
+                var el = document.getElementById('scores-' + sport);
+                if (!el) return;
+                var games = data[sport] || [];
+                if (!games.length) { el.innerHTML = '<div class="no-sc">No games today</div>'; return; }
+                var h = '';
+                games.forEach(function(g) {
+                    var sc = g.state === 'in' ? 'live' : (g.state === 'post' ? 'final' : 'pre');
+                    h += '<div class="sc-card" onclick="openScoreStats(\'' + sport + '\',\'' + g.event_id + '\')">';
+                    h += '<div class="sc-row"><span>' + g.away_team + '</span><span class="sc-num">' + g.away_score + '</span></div>';
+                    h += '<div class="sc-row"><span>' + g.home_team + '</span><span class="sc-num">' + g.home_score + '</span></div>';
+                    h += '<div class="sc-status ' + sc + '">' + g.status + '</div>';
+                    h += '</div>';
+                });
+                el.innerHTML = h;
+            });
+        }).catch(function() {});
 }
-setInterval(refreshScores,30000);
-window.onload=function(){refreshScores()};
+
+function openScoreStats(sport, eventId) {
+    var modal = document.getElementById('stats-modal');
+    var title = document.getElementById('modal-game-title');
+    var body = document.getElementById('modal-game-body');
+    title.textContent = sport + ' Game Stats';
+    body.innerHTML = '<div class="ld">Loading stats...</div>';
+    modal.classList.add('open');
+    fetch('/game_stats?sport=' + encodeURIComponent(sport) + '&event_id=' + encodeURIComponent(eventId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.teams || !data.teams.length) { body.innerHTML = '<div class="ld">Stats not available yet.</div>'; return; }
+            var h = '';
+            data.teams.forEach(function(team) {
+                if (!team.players || !team.players.length) return;
+                h += '<div class="modal-team">' + team.name + '</div>';
+                h += '<div class="tbl-wrap"><table class="stats-tbl"><tr><th>Player</th>';
+                data.labels.forEach(function(l) { h += '<th>' + l + '</th>'; });
+                h += '</tr>';
+                team.players.forEach(function(p) {
+                    h += '<tr><td>' + p.name + '</td>';
+                    data.labels.forEach(function(l) { h += '<td>' + (p.stats[l] || '-') + '</td>'; });
+                    h += '</tr>';
+                });
+                h += '</table></div>';
+            });
+            body.innerHTML = h || '<div class="ld">No stats yet.</div>';
+        })
+        .catch(function() { body.innerHTML = '<div class="ld">Error.</div>'; });
+}
+
+setInterval(refreshScores, 30000);
+window.onload = function() { refreshScores(); };
 </script>
 </head>
 <body>
 <h1>Live Odds Tracker</h1>
 
-<div class="mo" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="md">
-    <button class="mc" onclick="closeModal()">x</button>
-    <div class="mt" id="mtitle"></div>
-    <div id="mbody"></div>
+<div class="modal-bg" id="stats-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">x</button>
+    <div class="modal-title" id="modal-game-title"></div>
+    <div id="modal-game-body"></div>
   </div>
 </div>
 
@@ -370,29 +409,30 @@ window.onload=function(){refreshScores()};
   <div class="sidebar">
     <h2>Live Scores</h2>
     <div class="sb-sport">NBA</div>
-    <div id="sc-NBA"><div class="no-sc">Loading...</div></div>
+    <div id="scores-NBA"><div class="no-sc">Loading...</div></div>
     <div class="sb-sport">NFL</div>
-    <div id="sc-NFL"><div class="no-sc">Loading...</div></div>
+    <div id="scores-NFL"><div class="no-sc">Loading...</div></div>
   </div>
   <div class="main">
     <div class="tabs">
-      <button class="tab active" id="t-NBA" onclick="switchTab('NBA')">NBA</button>
-      <button class="tab" id="t-NFL" onclick="switchTab('NFL')">NFL</button>
+      <button class="tab-btn active" id="tab-NBA" onclick="switchTab('NBA')">NBA</button>
+      <button class="tab-btn" id="tab-NFL" onclick="switchTab('NFL')">NFL</button>
     </div>
 
-    <div class="tc active" id="c-NBA">
+    <div class="tab-content active" id="content-NBA">
       <div class="nav">
         {% if nba_day > 0 %}<a href="/?sport=NBA&day={{ nba_day - 1 }}"><button>Prev</button></a>{% else %}<button disabled>Prev</button>{% endif %}
-        <div class="dt">{{ nba_date }}</div>
+        <div class="date-lbl">{{ nba_date }}</div>
         {% if nba_day < nba_total - 1 %}<a href="/?sport=NBA&day={{ nba_day + 1 }}"><button>Next</button></a>{% else %}<button disabled>Next</button>{% endif %}
       </div>
       {% if nba_games %}
         {% for game in nba_games %}
-        <div class="game">
-          <div class="gt" onclick="openStats('NBA','{{ game['event_id'] }}','{{ game['away'] }} vs {{ game['home'] }}')">
+        {% set gid = "nba-" ~ loop.index %}
+        <div class="game-card">
+          <div class="game-title" id="game-title-NBA-{{ game['event_id'] }}" data-title="{{ game['away'] | e }} vs {{ game['home'] | e }}" onclick="openStats('NBA', '{{ game['event_id'] }}')">
             {{ game['away'] }} vs {{ game['home'] }} <span style="color:#4ecca3;font-size:.75em">click for stats</span>
           </div>
-          <div class="gtime">{{ game['time'] }}</div>
+          <div class="game-time">{{ game['time'] }}</div>
           <table>
             <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best</th><th>Best Book</th><th>#</th></tr>
             {% for team, d in game['teams'].items() %}
@@ -401,33 +441,34 @@ window.onload=function(){refreshScores()};
               <td class="pos">{{ d['win_prob'] }}%</td>
               <td class="{{ 'pos' if d['average'] > 0 else 'neg' }}">{{ '+' if d['average'] > 0 else '' }}{{ d['average'] }}</td>
               <td class="{{ 'pos' if d['best'] > 0 else 'neg' }}">{{ '+' if d['best'] > 0 else '' }}{{ d['best'] }}</td>
-              <td><a href="{{ d['best_link'] }}" target="_blank" class="bl">{{ d['best_book'] }}</a></td>
+              <td><a href="{{ d['best_link'] }}" target="_blank" class="book-a">{{ d['best_book'] }}</a></td>
               <td>{{ d['books'] }}</td>
             </tr>
             {% endfor %}
           </table>
-          <button class="bp" id="bp-nba-{{ loop.index }}" onclick="toggleProps('nba-{{ loop.index }}','{{ game['sport_key'] }}','{{ game['event_id'] }}')">Show Props</button>
-          <div class="ps" id="ps-nba-{{ loop.index }}"></div>
+          <button class="props-btn" onclick="toggleProps(this, 'props-{{ gid }}', '{{ game['sport_key'] }}', '{{ game['event_id'] }}')">Show Props</button>
+          <div class="props-body" id="props-{{ gid }}"></div>
         </div>
         {% endfor %}
       {% else %}
-        <div class="ng">No NBA games on this date.</div>
+        <div class="no-games">No NBA games on this date.</div>
       {% endif %}
     </div>
 
-    <div class="tc" id="c-NFL">
+    <div class="tab-content" id="content-NFL">
       <div class="nav">
         {% if nfl_day > 0 %}<a href="/?sport=NFL&day={{ nfl_day - 1 }}"><button>Prev</button></a>{% else %}<button disabled>Prev</button>{% endif %}
-        <div class="dt">{{ nfl_date }}</div>
+        <div class="date-lbl">{{ nfl_date }}</div>
         {% if nfl_day < nfl_total - 1 %}<a href="/?sport=NFL&day={{ nfl_day + 1 }}"><button>Next</button></a>{% else %}<button disabled>Next</button>{% endif %}
       </div>
       {% if nfl_games %}
         {% for game in nfl_games %}
-        <div class="game">
-          <div class="gt" onclick="openStats('NFL','{{ game['event_id'] }}','{{ game['away'] }} vs {{ game['home'] }}')">
+        {% set gid = "nfl-" ~ loop.index %}
+        <div class="game-card">
+          <div class="game-title" id="game-title-NFL-{{ game['event_id'] }}" data-title="{{ game['away'] | e }} vs {{ game['home'] | e }}" onclick="openStats('NFL', '{{ game['event_id'] }}')">
             {{ game['away'] }} vs {{ game['home'] }} <span style="color:#4ecca3;font-size:.75em">click for stats</span>
           </div>
-          <div class="gtime">{{ game['time'] }}</div>
+          <div class="game-time">{{ game['time'] }}</div>
           <table>
             <tr><th>Team</th><th>Win%</th><th>Average</th><th>Best</th><th>Best Book</th><th>#</th></tr>
             {% for team, d in game['teams'].items() %}
@@ -436,17 +477,17 @@ window.onload=function(){refreshScores()};
               <td class="pos">{{ d['win_prob'] }}%</td>
               <td class="{{ 'pos' if d['average'] > 0 else 'neg' }}">{{ '+' if d['average'] > 0 else '' }}{{ d['average'] }}</td>
               <td class="{{ 'pos' if d['best'] > 0 else 'neg' }}">{{ '+' if d['best'] > 0 else '' }}{{ d['best'] }}</td>
-              <td><a href="{{ d['best_link'] }}" target="_blank" class="bl">{{ d['best_book'] }}</a></td>
+              <td><a href="{{ d['best_link'] }}" target="_blank" class="book-a">{{ d['best_book'] }}</a></td>
               <td>{{ d['books'] }}</td>
             </tr>
             {% endfor %}
           </table>
-          <button class="bp" id="bp-nfl-{{ loop.index }}" onclick="toggleProps('nfl-{{ loop.index }}','{{ game['sport_key'] }}','{{ game['event_id'] }}')">Show Props</button>
-          <div class="ps" id="ps-nfl-{{ loop.index }}"></div>
+          <button class="props-btn" onclick="toggleProps(this, 'props-{{ gid }}', '{{ game['sport_key'] }}', '{{ game['event_id'] }}')">Show Props</button>
+          <div class="props-body" id="props-{{ gid }}"></div>
         </div>
         {% endfor %}
       {% else %}
-        <div class="ng">No NFL games on this date.</div>
+        <div class="no-games">No NFL games on this date.</div>
       {% endif %}
     </div>
 
@@ -499,16 +540,9 @@ def debug():
         r = requests.get("https://api.the-odds-api.com/v4/sports/basketball_nba/odds",
             params={"apiKey": API_KEY, "regions": "us", "markets": "h2h", "oddsFormat": "american"}, timeout=10)
         data = r.json()
-        return jsonify({"status": r.status_code, "game_count": len(data), "first": data[0] if data else None})
+        return jsonify({"status": r.status_code, "game_count": len(data)})
     except Exception as e:
         return jsonify({"error": str(e)})
-
-@app.route("/testdata")
-def testdata():
-    all_odds = get_odds()
-    nba_dates = list(all_odds["NBA"].keys())
-    nba_games = all_odds["NBA"].get(nba_dates[0], []) if nba_dates else []
-    return jsonify({"dates": nba_dates, "game_count": len(nba_games), "first_game": nba_games[0] if nba_games else None})
 
 if __name__ == "__main__":
     app.run(debug=True)
